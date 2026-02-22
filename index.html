@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YYUUS TV PREMIUM</title>
+    <title>YYUUS TV - Estilo Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root {
             --bg-deep: #0D0D15;
             --yyuus-pink: #FF3B8E;
-            --yyuus-glow: rgba(255, 59, 142, 0.6);
-            --card-bg: #1A1A2E;
+            --yyuus-glow: rgba(255, 59, 142, 0.5);
+            --card-bg: #161625;
             --white: #ffffff;
         }
 
@@ -21,109 +21,111 @@
             color: var(--white);
             margin: 0; padding: 0;
             display: flex; flex-direction: column;
-            align-items: center; overflow: hidden; height: 100vh;
+            align-items: center; /* Centrado horizontal total */
+            height: 100vh; width: 100vw;
+            overflow: hidden;
         }
 
-        /* --- Header y Tabs Súper Redondeados --- */
-        header { padding: 15px; text-align: center; width: 100%; }
-        .logo-box { 
-            background: rgba(255, 59, 142, 0.1);
-            padding: 5px 20px; border-radius: 50px;
-            display: inline-block; border: 1px solid var(--yyuus-pink);
-            box-shadow: 0 0 10px var(--yyuus-glow);
+        /* --- Header Centrado --- */
+        header { 
+            width: 100%; padding: 20px 0; 
+            display: flex; flex-direction: column; align-items: center; 
         }
-        .logo-text { font-size: 20px; font-weight: 900; color: var(--yyuus-pink); letter-spacing: 2px; }
+        .logo-glow { 
+            background: rgba(255, 59, 142, 0.05);
+            padding: 8px 25px; border-radius: 50px;
+            border: 1.5px solid var(--yyuus-pink);
+            box-shadow: 0 0 15px var(--yyuus-glow);
+            color: var(--yyuus-pink); font-weight: 900; font-size: 22px; letter-spacing: 2px;
+        }
 
-        nav { display: flex; gap: 10px; margin-top: 15px; }
+        nav { display: flex; gap: 12px; margin-top: 20px; }
         .tab { 
-            padding: 8px 18px; border-radius: 20px; font-size: 13px;
-            background: rgba(255,255,255,0.05); cursor: pointer; border: 1px solid transparent;
+            padding: 8px 20px; border-radius: 25px; font-size: 12px; font-weight: 700;
+            background: rgba(255,255,255,0.05); color: #888; border: none; cursor: pointer;
         }
-        .tab.active { background: var(--yyuus-pink); box-shadow: 0 0 15px var(--yyuus-glow); }
+        .tab.active { background: var(--yyuus-pink); color: white; box-shadow: 0 0 15px var(--yyuus-glow); }
 
-        /* --- Reproductor con Neón --- */
-        .player-wrapper {
-            width: 92%; margin-top: 20px;
-            border-radius: 30px; overflow: hidden;
+        /* --- Reproductor Centrado y Redondeado --- */
+        .player-container {
+            width: 90%; max-width: 500px;
+            margin: 20px 0; aspect-ratio: 16 / 9;
+            border-radius: 35px; overflow: hidden;
             border: 2px solid var(--yyuus-pink);
-            box-shadow: 0 0 25px var(--yyuus-glow);
-            aspect-ratio: 16 / 9; background: #000;
+            box-shadow: 0 0 30px var(--yyuus-glow);
+            background: #000;
         }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- Panel de Información --- */
-        .info-panel {
-            width: 85%; background: var(--card-bg);
-            margin-top: -20px; z-index: 10;
+        /* --- Info Panel Centrado --- */
+        .info-card {
+            width: 80%; max-width: 400px;
+            background: var(--card-bg);
             border-radius: 25px; padding: 15px;
             display: flex; justify-content: space-around;
             border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            margin-bottom: 25px;
         }
-        .info-item { text-align: center; }
-        .info-item span { display: block; font-size: 10px; color: var(--yyuus-pink); text-transform: uppercase; font-weight: 800; }
-        .info-item p { margin: 5px 0 0 0; font-size: 13px; font-weight: 600; }
+        .info-box { text-align: center; }
+        .info-box span { display: block; font-size: 9px; color: var(--yyuus-pink); font-weight: 800; text-transform: uppercase; }
+        .info-box p { margin: 4px 0 0 0; font-size: 12px; font-weight: 600; }
 
-        /* --- Selector de Canales con Botones Neón --- */
-        .selector-area {
-            flex-grow: 1; display: flex; align-items: center;
-            justify-content: center; gap: 20px; width: 100%;
+        /* --- Selector de Canales Centrado --- */
+        .controls {
+            display: flex; align-items: center; justify-content: center;
+            gap: 25px; width: 100%;
         }
 
-        .btn-neon {
+        .btn-round {
             width: 50px; height: 50px; border-radius: 50%;
-            border: 2px solid var(--yyuus-pink);
-            background: none; color: var(--yyuus-pink);
-            font-size: 20px; cursor: pointer;
+            border: 2px solid var(--yyuus-pink); background: none;
+            color: var(--yyuus-pink); font-size: 20px; cursor: pointer;
             box-shadow: 0 0 10px var(--yyuus-glow);
             display: flex; align-items: center; justify-content: center;
         }
 
-        .channel-main-card {
-            width: 140px; height: 140px;
+        .channel-active {
+            width: 130px; height: 130px;
             background: var(--card-bg);
-            border-radius: 35px; border: 2px solid var(--yyuus-pink);
+            border-radius: 40px; border: 2px solid var(--yyuus-pink);
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            box-shadow: 0 0 20px var(--yyuus-glow);
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 25px var(--yyuus-glow);
+            transition: 0.3s;
         }
-        .channel-main-card img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 10px; }
-        .channel-main-card strong { font-size: 14px; text-transform: uppercase; }
+        .channel-active img { width: 65px; height: 65px; object-fit: contain; margin-bottom: 10px; }
+        .channel-active b { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
 
-        @keyframes slideIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo-box">
-            <div class="logo-text">YYUUS TV</div>
-        </div>
+        <div class="logo-glow">YYUUS TV</div>
         <nav>
-            <div class="tab active">TELEVISIÓN</div>
-            <div class="tab">NOTICIAS</div>
-            <div class="tab">CONFIG</div>
+            <button class="tab active">TELEVISIÓN</button>
+            <button class="tab">NOTICIAS</button>
+            <button class="tab">CONFIG</button>
         </nav>
     </header>
 
-    <div class="player-wrapper">
+    <div class="player-container">
         <video id="video" controls autoplay playsinline></video>
     </div>
 
-    <div class="info-panel">
-        <div class="info-item"><span>Canal</span><p id="info-name">Mega</p></div>
-        <div class="info-item"><span>Programa</span><p id="info-prog">Noticias Central</p></div>
-        <div class="info-item"><span>Horario</span><p id="info-time">20:00 - 21:00</p></div>
+    <div class="info-card">
+        <div class="info-box"><span>Canal</span><p id="txt-canal">MEGA</p></div>
+        <div class="info-box"><span>Programa</span><p id="txt-prog">Mucho Gusto</p></div>
+        <div class="info-box"><span>Horario</span><p id="txt-hora">08:00 - 13:00</p></div>
     </div>
 
-    <div class="selector-area">
-        <button class="btn-neon" onclick="changeChan(-1)">❮</button>
+    <div class="controls">
+        <button class="btn-round" onclick="mover(-1)">❮</button>
         
-        <div id="active-card-container">
+        <div id="display-canal">
             </div>
 
-        <button class="btn-neon" onclick="changeChan(1)">❯</button>
+        <button class="btn-round" onclick="mover(1)">❯</button>
     </div>
 
     <script>
@@ -131,51 +133,53 @@
         tg.expand();
         tg.setHeaderColor('#0D0D15');
 
-        const channels = [
-            { name: "Mega", prog: "Mucho Gusto", time: "08:00 - 13:00", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e0/Logo_Mega_2020.png", url: "https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8" },
-            { name: "TVN", prog: "Buenos Días a Todos", time: "08:00 - 13:00", logo: "https://upload.wikimedia.org/wikipedia/commons/2/22/TVN_Logo_2020.svg", url: "https://mdstrm.com/live-stream-playlist/530c804b19777d4c06000032.m3u8" },
-            { name: "CHV", prog: "Contigo en la Mañana", time: "08:00 - 13:00", logo: "https://upload.wikimedia.org/wikipedia/commons/a/af/Chilevisi%C3%B3n_2018_logo.svg", url: "https://vdo.turner.com/live/chilevision/playlist.m3u8" },
-            { name: "Canal 13", prog: "Tu Día", time: "08:00 - 13:00", logo: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Logo_Canal_13_Chile.svg", url: "https://d156un69z3b3la.cloudfront.net/out/v1/7183e84360e64303b3069c9b6890f5c1/index.m3u8" }
+        // Canales usando tus nombres de archivo locales
+        const lista = [
+            { id: "mega", name: "MEGA", prog: "Mucho Gusto", time: "08:00 - 13:00", img: "mega.png", url: "https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8" },
+            { id: "tvn", name: "TVN", prog: "Buenos Días a Todos", time: "08:00 - 13:00", img: "tvn.png", url: "https://mdstrm.com/live-stream-playlist/530c804b19777d4c06000032.m3u8" },
+            { id: "chv", name: "CHV", prog: "Contigo en la Mañana", time: "08:00 - 13:00", img: "chv.png", url: "https://vdo.turner.com/live/chilevision/playlist.m3u8" },
+            { id: "c13", name: "CANAL 13", prog: "Tu Día", time: "08:00 - 13:00", img: "canal13.png", url: "https://d156un69z3b3la.cloudfront.net/out/v1/7183e84360e64303b3069c9b6890f5c1/index.m3u8" }
         ];
 
-        let index = 0;
+        let i = 0;
         const video = document.getElementById('video');
 
-        function updateApp() {
-            const ch = channels[index];
+        function actualizar() {
+            const c = lista[i];
             
-            // Actualizar Info Panel
-            document.getElementById('info-name').innerText = ch.name;
-            document.getElementById('info-prog').innerText = ch.prog;
-            document.getElementById('info-time').innerText = ch.time;
+            // Texto Info
+            document.getElementById('txt-canal').innerText = c.name;
+            document.getElementById('txt-prog').innerText = c.prog;
+            document.getElementById('txt-hora').innerText = c.time;
 
-            // Actualizar Tarjeta Central
-            document.getElementById('active-card-container').innerHTML = `
-                <div class="channel-main-card">
-                    <img src="${ch.logo}" alt="logo">
-                    <strong>${ch.name}</strong>
+            // Tarjeta Central (Imagen local)
+            document.getElementById('display-canal').innerHTML = `
+                <div class="channel-active">
+                    <img src="${c.img}" alt="${c.name}">
+                    <b>${c.name}</b>
                 </div>
             `;
 
-            // Cargar Streaming
+            // Streaming
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                hls.loadSource(ch.url);
+                hls.loadSource(c.url);
                 hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
             } else {
-                video.src = ch.url;
+                video.src = c.url;
+                video.play();
             }
 
-            tg.HapticFeedback.notificationOccurred('success');
+            tg.HapticFeedback.impactOccurred('light');
         }
 
-        function changeChan(dir) {
-            index = (index + dir + channels.length) % channels.length;
-            updateApp();
+        function mover(d) {
+            i = (i + d + lista.length) % lista.length;
+            actualizar();
         }
 
-        // Iniciar App
-        updateApp();
+        actualizar(); // Carga inicial
     </script>
 </body>
 </html>
