@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor - TVStudio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.12/hls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header siempre visible y brillante */
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.98), rgba(0, 0, 0, 0.85));
+            border-bottom: 2px solid rgba(236, 72, 153, 0.4);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back-header {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.4), rgba(168, 139, 250, 0.4));
+            border: 2px solid rgba(236, 72, 153, 0.6);
+            color: white;
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .btn-back-header:hover {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.6), rgba(168, 139, 250, 0.6));
+            border-color: #ec4899;
+            transform: scale(1.12);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .channel-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .channel-info-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 0.2rem;
+            color: #fff;
+        }
+
+        .channel-info-subtitle {
+            font-size: 0.9rem;
+            color: rgba(236, 72, 153, 0.9);
+            font-weight: 600;
+        }
+
+        .logo-small {
+            font-size: 1.3rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .logo-small:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-small span {
+            background: linear-gradient(to right, #ec4899, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Contenedor principal */
+        .player-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            background: #000;
+        }
+
+        /* Área del video */
+        .video-area {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Botón Play central - GRANDE Y VISIBLE */
+        .play-button-center {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #ec4899, #a78bfa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 0 40px rgba(236, 72, 153, 0.8),
+                0 0 80px rgba(168, 139, 250, 0.5),
+                0 15px 60px rgba(236, 72, 153, 0.5);
+            z-index: 30;
+            border: 4px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .video-area.playing .play-button-center {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .play-button-center:hover {
+            transform: scale(1.2);
+            box-shadow: 
+                0 0 60px rgba(236, 72, 153, 1),
+                0 0 100px rgba(168, 139, 250, 0.8),
+                0 20px 80px rgba(236, 72, 153, 0.7);
+        }
+
+        .play-button-center svg {
+            width: 45%;
+            height: 45%;
+            fill: white;
+            margin-left: 10px;
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.6));
+        }
+
+        /* Controles siempre visibles */
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.98),
+                rgba(0, 0, 0, 0.85),
+                rgba(0, 0, 0, 0.4),
+                transparent
+            );
+            padding: 5rem 2rem 2.5rem;
+            z-index: 50;
+            opacity: 1;
+            transition: padding 0.3s ease;
+        }
+
+        .video-area:hover .video-controls {
+            padding: 3rem 2rem 2.5rem;
+        }
+
+        .controls-progress {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: visible;
+            transition: all 0.2s;
+        }
+
+        .progress-bar:hover {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ec4899, #a78bfa, #60a5fa);
+            width: 0%;
+            border-radius: 4px;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.8);
+        }
+
+        .progress-handle {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            left: 0%;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.9);
+            opacity: 1;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .progress-bar:hover .progress-handle {
+            width: 22px;
+            height: 22px;
+            box-shadow: 0 0 30px rgba(236, 72, 153, 1);
+        }
+
+        .controls-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-control {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(168, 139, 250, 0.25));
+            border: 2px solid rgba(236, 72, 153, 0.5);
+            color: white;
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .btn-control:hover {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.45), rgba(168, 139, 250, 0.45));
+            border-color: #ec4899;
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .btn-control:active {
+            transform: scale(0.95);
+        }
+
+        .time-display {
+            font-size: 0.95rem;
+            color: white;
+            min-width: 120px;
+            text-align: center;
+            font-weight: 700;
+            background: rgba(236, 72, 153, 0.15);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .volume-slider {
+            width: 110px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .volume-slider:hover {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ec4899, #a78bfa);
+            width: 100%;
+            border-radius: 3px;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+        }
+
+        /* Menu de calidad */
+        .quality-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.98);
+            border: 2px solid rgba(236, 72, 153, 0.5);
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            min-width: 140px;
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .quality-menu.active {
+            display: flex;
+        }
+
+        .quality-option {
+            padding: 0.7rem 1.2rem;
+            cursor: pointer;
+            border-radius: 0.6rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+        }
+
+        .quality-option:hover {
+            background: rgba(236, 72, 153, 0.25);
+            transform: translateX(4px);
+        }
+
+        .quality-option.selected {
+            background: linear-gradient(135deg, #ec4899, #a78bfa);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.7);
+        }
+
+        /* Panel lateral */
+        .sidebar-panel {
+            width: 340px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(30, 10, 40, 0.98));
+            border-left: 2px solid rgba(236, 72, 153, 0.3);
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: white;
+        }
+
+        .channel-card-info {
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(168, 139, 250, 0.15));
+            border: 2px solid rgba(236, 72, 153, 0.4);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .channel-name-large {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .channel-type {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .channel-status {
+            display: inline-block;
+            background: linear-gradient(135deg, #ec4899, #a78bfa);
+            color: white;
+            padding: 0.4rem 0.9rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .sidebar-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .info-item {
+            background: rgba(236, 72, 153, 0.1);
+            padding: 0.9rem;
+            border-radius: 0.8rem;
+            border: 1px solid rgba(236, 72, 153, 0.25);
+        }
+
+        .info-item-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .info-item-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .btn-fullscreen {
+            width: 100%;
+            background: linear-gradient(135deg, #ec4899, #a78bfa);
+            color: white;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-top: auto;
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-fullscreen:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-panel {
+                display: none;
+            }
+            .play-button-center {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        .sidebar-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-panel::-webkit-scrollbar-track {
+            background: rgba(236, 72, 153, 0.1);
+        }
+
+        .sidebar-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(to right, #ec4899, #a78bfa);
+            border-radius: 10px;
+        }
+
+        .sidebar-panel::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to right, #f472b6, #c4b5fd);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="player-header">
+        <div class="header-left">
+            <button class="btn-back-header" onclick="goBack()" title="Volver">← </button>
+            <div class="channel-info">
+                <div class="channel-info-title" id="channelNameHeader">Canal</div>
+                <div class="channel-info-subtitle" id="channelTypeHeader">En directo</div>
+            </div>
+        </div>
+        <div class="logo-small" onclick="window.location.href='index.html'">TV<span>Studio</span></div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="player-container">
+        <!-- Área de video -->
+        <div class="video-area" id="videoArea">
+            <div class="play-button-center" id="playButtonCenter" title="Presiona para reproducir">
+                <svg viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </div>
+            <video id="videoPlayer"></video>
+
+            <!-- Controles -->
+            <div class="video-controls">
+                <div class="controls-progress">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                        <div class="progress-handle" id="progressHandle"></div>
+                    </div>
+                </div>
+
+                <div class="controls-bottom">
+                    <div class="controls-left">
+                        <button class="btn-control" id="btnPlay" title="Play/Pausa">▶</button>
+                        <div class="volume-slider" id="volumeSlider">
+                            <div class="volume-fill" id="volumeFill"></div>
+                        </div>
+                        <button class="btn-control" id="btnMute" title="Silenciar">🔊</button>
+                        <div class="time-display">
+                            <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
+                        </div>
+                    </div>
+
+                    <div class="controls-right">
+                        <div style="position: relative;">
+                            <button class="btn-control" id="btnQuality" title="Calidad">📺</button>
+                            <div class="quality-menu" id="qualityMenu">
+                                <div class="quality-option selected" onclick="setQuality('auto')">Auto</div>
+                                <div class="quality-option" onclick="setQuality('1080p')">1080p</div>
+                                <div class="quality-option" onclick="setQuality('720p')">720p</div>
+                                <div class="quality-option" onclick="setQuality('480p')">480p</div>
+                            </div>
+                        </div>
+                        <button class="btn-control" id="btnFullscreen" title="Pantalla completa">⛶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="sidebar-panel">
+            <div class="sidebar-title">📺 Información</div>
+
+            <div class="channel-card-info">
+                <div class="channel-name-large" id="channelNameSidebar">Canal</div>
+                <div class="channel-type" id="channelTypeSidebar">Televisión</div>
+                <div class="channel-status">● EN DIRECTO</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Detalles</div>
+                <div class="sidebar-content">
+                    <div class="info-item">
+                        <div class="info-item-label">Resolución</div>
+                        <div class="info-item-value" id="resolutionInfo">Detectando...</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Formato</div>
+                        <div class="info-item-value">HLS (m3u8)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Estadísticas</div>
+                <div class="sidebar-content">
+                    <div class="info-item">
+                        <div class="info-item-label">Tiempo</div>
+                        <div class="info-item-value" id="playedTime">00:00</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Estado</div>
+                        <div class="info-item-value" id="bufferingStatus">Listo</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶ Pantalla Completa</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuración del reproductor
+        const video = document.getElementById('videoPlayer');
+        const videoArea = document.getElementById('videoArea');
+        const playButtonCenter = document.getElementById('playButtonCenter');
+        const btnPlay = document.getElementById('btnPlay');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const progressHandle = document.getElementById('progressHandle');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const btnMute = document.getElementById('btnMute');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeFill = document.getElementById('volumeFill');
+        const btnQuality = document.getElementById('btnQuality');
+        const qualityMenu = document.getElementById('qualityMenu');
+        const btnFullscreen = document.getElementById('btnFullscreen');
+
+        let isMuted = false;
+        let hls;
+
+        // Obtener datos del URL
+        function getChannelFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                name: decodeURIComponent(params.get('name') || 'Canal'),
+                type: decodeURIComponent(params.get('type') || 'Televisión'),
+                url: decodeURIComponent(params.get('url') || ''),
+                id: params.get('id') || '1'
+            };
+        }
+
+        const channel = getChannelFromURL();
+
+        // Actualizar información del canal
+        function updateChannelInfo() {
+            document.getElementById('channelNameHeader').textContent = channel.name;
+            document.getElementById('channelTypeHeader').textContent = channel.type;
+            document.getElementById('channelNameSidebar').textContent = channel.name;
+            document.getElementById('channelTypeSidebar').textContent = channel.type;
+        }
+
+        // Inicializar video con HLS
+        function initializeVideo() {
+            const streamUrl = channel.url || 'https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8';
+
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true
+                });
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+            }
+
+            video.volume = 0.8;
+            volumeFill.style.width = '80%';
+        }
+
+        // Eventos
+        playButtonCenter.addEventListener('click', () => {
+            video.play();
+            videoArea.classList.add('playing');
+        });
+
+        video.addEventListener('play', () => {
+            videoArea.classList.add('playing');
+            btnPlay.textContent = '⏸';
+        });
+
+        video.addEventListener('pause', () => {
+            videoArea.classList.remove('playing');
+            btnPlay.textContent = '▶';
+        });
+
+        btnPlay.addEventListener('click', () => {
+            if (video.paused) video.play();
+            else video.pause();
+        });
+
+        // Volumen
+        btnMute.addEventListener('click', () => {
+            if (!isMuted) {
+                video.volume = 0;
+                isMuted = true;
+                btnMute.textContent = '🔇';
+            } else {
+                video.volume = 0.8;
+                isMuted = false;
+                btnMute.textContent = '🔊';
+                volumeFill.style.width = '80%';
+            }
+        });
+
+        volumeSlider.addEventListener('click', (e) => {
+            const rect = volumeSlider.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.volume = Math.max(0, Math.min(1, percent));
+            volumeFill.style.width = (percent * 100) + '%';
+            isMuted = false;
+            btnMute.textContent = '🔊';
+        });
+
+        // Progreso
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        });
+
+        video.addEventListener('timeupdate', () => {
+            if (video.duration) {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressFill.style.width = percent + '%';
+                progressHandle.style.left = percent + '%';
+                currentTimeEl.textContent = formatTime(video.currentTime);
+                durationEl.textContent = formatTime(video.duration);
+                document.getElementById('playedTime').textContent = formatTime(video.currentTime);
+            }
+        });
+
+        // Calidad
+        btnQuality.addEventListener('click', () => {
+            qualityMenu.classList.toggle('active');
+        });
+
+        window.setQuality = function(quality) {
+            const options = document.querySelectorAll('.quality-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            event.target.classList.add('selected');
+            qualityMenu.classList.remove('active');
+        };
+
+        // Pantalla completa
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoArea.requestFullscreen().catch(err => console.log('Error:', err));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '00:00';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Inicializar
+        updateChannelInfo();
+        initializeVideo();
+    </script>
+</body>
+</html>
