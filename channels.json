@@ -63,6 +63,20 @@
     "cat": "Radio"
   },
   {
+    "id": 11,
+    "name": "HBO",
+    "emoji": "🔴",
+    "url": "https://d2gg3tblxgbsh1.cloudfront.net/out/v1/5f4fe434b5454db58d2b5f31ca1c30ea/index.m3u8",
+    "cat": "Internacional"
+  },
+  {
+    "id": 12,
+    "name": "TNT",
+    "emoji": "🔴",
+    "url": "https://d2gg3tblxgbsh1.cloudfront.net/out/v1/5f4fe434b5454db58d2b5f31ca1c30ea/index.m3u8",
+    "cat": "Internacional"
+  },
+  {
     "id": 10,
     "name": "TV5Monde",
     "emoji": "🇫🇷",
