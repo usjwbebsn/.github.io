@@ -200,51 +200,6 @@
       "accent": "linear-gradient(to right, #8b5cf6, #a78bfa)",
       "category": 2,
       "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
-    },
-    {
-      "id": 104,
-      "name": "Chilevisión",
-      "type": "Televisión Chilena",
-      "image": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=80",
-      "accent": "linear-gradient(to right, #f59e0b, #fbbf24)",
-      "category": 1,
-      "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
-    },
-    {
-      "id": 105,
-      "name": "La Red",
-      "type": "Televisión Chilena",
-      "image": "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800&q=80",
-      "accent": "linear-gradient(to right, #ec4899, #f472b6)",
-      "category": 2,
-      "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
-    },
-    {
-      "id": 106,
-      "name": "Unicable",
-      "type": "Televisión Chilena",
-      "image": "https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=800&q=80",
-      "accent": "linear-gradient(to right, #10b981, #34d399)",
-      "category": 3,
-      "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
-    },
-    {
-      "id": 107,
-      "name": "CNN Chile",
-      "type": "Televisión Chilena",
-      "image": "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80",
-      "accent": "linear-gradient(to right, #06b6d4, #0ea5e9)",
-      "category": 7,
-      "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
-    },
-    {
-      "id": 108,
-      "name": "Arturo López Rodó",
-      "type": "Televisión Chilena",
-      "image": "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80",
-      "accent": "linear-gradient(to right, #f97316, #fb923c)",
-      "category": 7,
-      "streamUrl": "https://test-streams.mux.dev/x36xhzz/x3 rush.m3u8"
     }
   ]
 }
