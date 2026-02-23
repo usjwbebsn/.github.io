@@ -1,165 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YYUUS TV PRO</title>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi TV Personal</title>
 
-    <style>
-        :root {
-            --bg-deep: #0D0D15;
-            --yyuus-pink: #FF3B8E;
-            --yyuus-glow: rgba(255, 59, 142, 0.4);
-            --card-bg: #161625;
-            --plyr-color-main: #FF3B8E;
-        }
+  <link rel="stylesheet" href="style.css" />
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-deep);
-            color: white;
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column;
-            align-items: center;
-            height: 100vh; overflow: hidden;
-        }
-
-        .main-wrapper {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: space-around;
-            height: 100%; width: 100%; padding: 10px 0;
-        }
-
-        .logo-glow { 
-            background: rgba(255, 59, 142, 0.08);
-            padding: 10px 30px; border-radius: 50px;
-            border: 2px solid var(--yyuus-pink);
-            box-shadow: 0 0 20px var(--yyuus-glow);
-            color: var(--yyuus-pink); font-weight: 900; font-size: 22px;
-            display: inline-block;
-        }
-
-        .video-container {
-            width: 92%; max-width: 500px;
-            border-radius: 30px; overflow: hidden;
-            border: 2px solid var(--yyuus-pink);
-            box-shadow: 0 0 35px var(--yyuus-glow);
-        }
-
-        .plyr--video { border-radius: 28px; }
-
-        .info-card {
-            width: 85%; max-width: 380px;
-            background: var(--card-bg);
-            border-radius: 25px; padding: 15px;
-            display: flex; justify-content: space-around;
-            border: 1px solid rgba(255, 59, 142, 0.2);
-        }
-        .info-box { text-align: center; }
-        .info-box span { display: block; font-size: 9px; color: var(--yyuus-pink); font-weight: 800; text-transform: uppercase; }
-        .info-box p { margin: 0; font-size: 13px; font-weight: 600; }
-
-        .controls { display: flex; align-items: center; justify-content: center; gap: 20px; width: 100%; }
-        .btn-round {
-            width: 55px; height: 55px; border-radius: 50%;
-            border: 2px solid var(--yyuus-pink); background: rgba(255, 59, 142, 0.05);
-            color: var(--yyuus-pink); font-size: 22px; cursor: pointer;
-            box-shadow: 0 0 15px var(--yyuus-glow);
-        }
-
-        .channel-active {
-            width: 140px; height: 140px;
-            background: var(--card-bg);
-            border-radius: 40px; border: 2.5px solid var(--yyuus-pink);
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            box-shadow: 0 0 30px var(--yyuus-glow);
-            animation: pop 0.3s ease;
-        }
-        .channel-active img { width: 75px; height: 75px; object-fit: contain; margin-bottom: 8px; }
-        .channel-active b { font-size: 14px; font-weight: 800; text-transform: uppercase; }
-
-        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    </style>
+  <!-- React CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
+
 <body>
+  <div id="root"></div>
 
-    <div class="main-wrapper">
-        <header>
-            <div class="logo-glow">YYUUS TV</div>
-        </header>
-
-        <div class="video-container">
-            <video id="player" playsinline controls></video>
-        </div>
-
-        <div class="info-card">
-            <div class="info-box"><span>Canal</span><p id="txt-canal">MEGA</p></div>
-            <div class="info-box"><span>Programa</span><p id="txt-prog">Cargando...</p></div>
-            <div class="info-box"><span>Horario</span><p id="txt-hora">--:--</p></div>
-        </div>
-
-        <div class="controls">
-            <button class="btn-round" onclick="mover(-1)">❮</button>
-            <div id="display-canal"></div>
-            <button class="btn-round" onclick="mover(1)">❯</button>
-        </div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('#0D0D15');
-
-        const lista = [
-            { name: "MEGA", prog: "Mucho Gusto", time: "08:00 - 13:00", img: "mega.png", url: "https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8" },
-            { name: "TVN", prog: "Buenos Días a Todos", time: "08:00 - 13:00", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Logotipo_de_Televisi%C3%B2n_Nacional_de_Chile.svg/250px-Logotipo_de_Televisi%C3%B2n_Nacional_de_Chile.svg.png", url: "https://mdstrm.com/live-stream-playlist-v/555c9a91eb4886825b07ee7b.m3u8" },
-            { name: "CHV", prog: "Contigo en la Mañana", time: "08:00 - 13:00", img: "chv.png", url: "https://jireh-4-hls-video-cl-isp.dps.live/hls-video/lvcl5/cnn/cnn.smil/playlist.m3u8" },
-            { name: "CANAL 13", prog: "Tu Día", time: "08:00 - 13:00", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Logo_Canal_13_Chile.svg/1024px-Logo_Canal_13_Chile.svg.png", url: "https://redirector.rudo.video/hls-video/10b92cafdf3646cbc1e727f3dc76863621a327fd/t13/t13.smil/playlist.m3u8" }
-        ];
-
-        let i = 0;
-        const video = document.getElementById('player');
-        const player = new Plyr(video, { controls: ['play-large', 'play', 'mute', 'volume', 'fullscreen'] });
-        let hls;
-
-        function actualizar() {
-            const c = lista[i];
-            document.getElementById('txt-canal').innerText = c.name;
-            document.getElementById('txt-prog').innerText = c.prog;
-            document.getElementById('txt-hora').innerText = c.time;
-
-            document.getElementById('display-canal').innerHTML = `
-                <div class="channel-active">
-                    <img src="${c.img}" alt="${c.name}">
-                    <b>${c.name}</b>
-                </div>
-            `;
-
-            if (hls) { hls.destroy(); }
-            if (Hls.isSupported()) {
-                hls = new Hls();
-                hls.loadSource(c.url);
-                hls.attachMedia(video);
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = c.url;
-            }
-            tg.HapticFeedback.impactOccurred('medium');
-        }
-
-        function mover(d) {
-            i = (i + d + lista.length) % lista.length;
-            actualizar();
-        }
-
-        actualizar();
-    </script>
+  <script type="text/babel" src="app.js"></script>
 </body>
 </html>
