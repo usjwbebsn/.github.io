@@ -1,99 +1,65 @@
-const { useState, useEffect } = React;
+const { useState } = React;
 
 function App() {
 
-  const [canales, setCanales] = useState([]);
-  const [nombre, setNombre] = useState("");
-  const [url, setUrl] = useState("");
-  const [busqueda, setBusqueda] = useState("");
-  const [canalActual, setCanalActual] = useState("");
+  // 🔥 EDITA AQUÍ TUS CANALES
+  const canales = [
+    {
+      nombre: "TVN",
+      imagen: "https://via.placeholder.com/300x400?text=TVN",
+      url: "AQUI_VA_TU_URL_EMBED"
+    },
+    {
+      nombre: "Canal 13",
+      imagen: "https://via.placeholder.com/300x400?text=Canal+13",
+      url: "AQUI_VA_TU_URL_EMBED"
+    },
+    {
+      nombre: "Mega",
+      imagen: "https://via.placeholder.com/300x400?text=Mega",
+      url: "AQUI_VA_TU_URL_EMBED"
+    },
+    // Duplica hasta tener tus 50 canales reales
+  ];
 
-  // Cargar canales guardados
-  useEffect(() => {
-    const guardados = JSON.parse(localStorage.getItem("canales"));
-    if (guardados) {
-      setCanales(guardados);
-      if (guardados.length > 0) {
-        setCanalActual(guardados[0].url);
-      }
-    }
-  }, []);
-
-  // Guardar automáticamente
-  useEffect(() => {
-    localStorage.setItem("canales", JSON.stringify(canales));
-  }, [canales]);
-
-  const agregarCanal = () => {
-    if (!nombre || !url) {
-      alert("Completa nombre y URL");
-      return;
-    }
-
-    const nuevo = { nombre, url };
-    setCanales([...canales, nuevo]);
-    setNombre("");
-    setUrl("");
-  };
-
-  const eliminarCanal = (index) => {
-    const copia = [...canales];
-    copia.splice(index, 1);
-    setCanales(copia);
-  };
-
-  const canalesFiltrados = canales.filter(c =>
-    c.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const [canalActivo, setCanalActivo] = useState(null);
 
   return (
-    <div className="container">
-      <h1>📺 Mi TV Personal</h1>
+    <>
+      <div className="header">📺 TV Online</div>
 
-      <div className="form-section">
-        <h3>Agregar Canal</h3>
-
-        <input
-          placeholder="Nombre del canal"
-          value={nombre}
-          onChange={e => setNombre(e.target.value)}
-        />
-
-        <input
-          placeholder="URL del canal (embed o m3u8)"
-          value={url}
-          onChange={e => setUrl(e.target.value)}
-        />
-
-        <button onClick={agregarCanal}>Agregar</button>
+      <div className="container">
+        <div className="grid">
+          {canales.map((canal, index) => (
+            <div
+              key={index}
+              className="card"
+              onClick={() => setCanalActivo(canal)}
+            >
+              <img src={canal.imagen} alt={canal.nombre} />
+              <div className="card-title">{canal.nombre}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <input
-        placeholder="Buscar canal..."
-        value={busqueda}
-        onChange={e => setBusqueda(e.target.value)}
-      />
-
-      {canalActual && (
-        <div className="video-container">
+      {canalActivo && (
+        <div className="player">
           <iframe
-            src={canalActual}
+            src={canalActivo.url}
             allowFullScreen
             allow="autoplay"
           ></iframe>
+
+          <button
+            className="close-btn"
+            onClick={() => setCanalActivo(null)}
+          >
+            Cerrar
+          </button>
         </div>
       )}
-
-      <div className="grid">
-        {canalesFiltrados.map((canal, index) => (
-          <div key={index} className="card">
-            <strong>{canal.nombre}</strong>
-            <button onClick={() => setCanalActual(canal.url)}>Ver</button>
-            <button onClick={() => eliminarCanal(index)}>Eliminar</button>
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   );
 }
 
