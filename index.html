@@ -3,670 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TVStudio - Plataforma de Entretenimiento</title>
+    <title>Mega Chile - En Vivo (HLS Player)</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
+        :root {
+            --mega-red: #ed1c24;
+            --dark-bg: #0a0a0a;
+            --card-bg: #161616;
+            --accent: #ff4d4d;
         }
 
         body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            position: relative;
-        }
-
-        /* Fondo dinámico */
-        .background-dynamic {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 1s ease-out;
-        }
-
-        .background-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(2px);
-            z-index: -1;
-        }
-
-        .gradient-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent, rgba(0, 0, 0, 0.6));
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Contenedor principal */
-        .container {
-            position: relative;
-            z-index: 10;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            margin: 0;
             display: flex;
             flex-direction: column;
+            align-items: center;
             min-height: 100vh;
-            padding: 2rem 3rem;
         }
 
-        /* Header */
-        .header {
-            margin-bottom: 4rem;
+        header {
+            width: 100%;
+            background: linear-gradient(to bottom, #000, var(--dark-bg));
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 2px solid var(--mega-red);
         }
 
         .logo {
-            font-size: 3.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
-            letter-spacing: -0.02em;
-            margin-bottom: 2rem;
-            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            transition: transform 0.3s ease;
+            letter-spacing: -1px;
         }
 
-        .logo:hover {
-            transform: scale(1.02);
+        .container {
+            width: 95%;
+            max-width: 1100px;
+            margin-top: 30px;
         }
 
-        .logo span {
-            background: linear-gradient(to right, #ec4899, #a78bfa, #60a5fa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        /* Buscador */
-        .search-container {
-            max-width: 50rem;
+        /* Contenedor del reproductor */
+        .video-wrapper {
             position: relative;
-        }
-
-        .search-wrapper {
-            position: relative;
-        }
-
-        .search-glow {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to right, #ec4899, #a78bfa, #60a5fa);
-            border-radius: 2rem;
-            opacity: 0;
-            filter: blur(10px);
-            transition: opacity 0.3s ease;
-        }
-
-        .search-wrapper:hover .search-glow {
-            opacity: 0.3;
-        }
-
-        .search-box {
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 2rem;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            background: #000;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            transition: border-color 0.3s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid #333;
         }
 
-        .search-wrapper:hover .search-box {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .search-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-right: 1rem;
-            opacity: 0.6;
-        }
-
-        .search-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #fff;
-            font-size: 1.125rem;
-        }
-
-        .search-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Canal destacado */
-        .featured-section {
-            margin-bottom: 4rem;
-            max-width: 50rem;
-        }
-
-        .featured-group {
-            position: relative;
-        }
-
-        .featured-glow {
+        video {
             position: absolute;
-            inset: -0.25rem;
-            background: linear-gradient(to right, #ec4899, #a78bfa, #60a5fa);
-            border-radius: 3rem;
-            opacity: 0.2;
-            filter: blur(20px);
-            transition: opacity 0.3s ease;
-        }
-
-        .featured-glow:hover {
-            opacity: 0.4;
-        }
-
-        .featured-card {
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 3rem;
-            padding: 2rem;
-            overflow: hidden;
-            transition: border-color 0.3s ease;
-            cursor: pointer;
-        }
-
-        .featured-group:hover .featured-card {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .featured-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .featured-text h2 {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .featured-text p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 1rem;
-        }
-
-        .btn-play {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: linear-gradient(to right, #ec4899, #a78bfa);
-            color: white;
-            font-weight: 700;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
-        }
-
-        .btn-play:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(236, 72, 153, 0.5);
-        }
-
-        .featured-number {
-            font-size: 5rem;
-            font-weight: 900;
-            opacity: 0.2;
-            line-height: 1;
-        }
-
-        /* Secciones */
-        .content-sections {
-            flex: 1;
-        }
-
-        .section {
-            margin-bottom: 5rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 900;
-            margin-bottom: 2rem;
-            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .category-card {
-            position: relative;
-            cursor: pointer;
-            transform: scale(1);
-            transition: all 0.3s ease;
-            animation: slideUp 0.6s ease-out both;
-        }
-
-        .category-card:nth-child(1) { animation-delay: 0.05s; }
-        .category-card:nth-child(2) { animation-delay: 0.1s; }
-        .category-card:nth-child(3) { animation-delay: 0.15s; }
-        .category-card:nth-child(4) { animation-delay: 0.2s; }
-        .category-card:nth-child(5) { animation-delay: 0.25s; }
-        .category-card:nth-child(6) { animation-delay: 0.3s; }
-        .category-card:nth-child(7) { animation-delay: 0.35s; }
-        .category-card:nth-child(8) { animation-delay: 0.4s; }
-
-        .category-card:hover {
-            transform: scale(1.05);
-        }
-
-        .category-glow {
-            position: absolute;
-            inset: -0.25rem;
-            border-radius: 2rem;
-            opacity: 0;
-            filter: blur(20px);
-            transition: all 0.3s ease;
-            z-index: -1;
-        }
-
-        .category-card:hover .category-glow {
-            opacity: 0.6;
-            filter: blur(25px);
-        }
-
-        .category-card-inner {
-            position: relative;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 2rem;
-            overflow: hidden;
-            height: 16rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .category-card:hover .category-card-inner {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        .category-bg {
-            position: absolute;
-            inset: 0;
-            opacity: 0.2;
-            background-size: cover;
-            background-position: center;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-
-        .category-card:hover .category-bg {
-            opacity: 0.4;
-        }
-
-        .category-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            outline: none;
         }
 
-        .category-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
+        .info {
+            margin-top: 25px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border-left: 5px solid var(--mega-red);
         }
 
-        .category-name {
-            font-size: 1.25rem;
-            font-weight: 900;
-            transition: all 0.3s ease;
-        }
-
-        .category-card:hover .category-name {
-            background: linear-gradient(to right, #ec4899, #60a5fa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .category-play-btn {
-            align-self: flex-end;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            padding: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        .status {
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
+            gap: 10px;
+            color: var(--accent);
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
 
-        .category-card:hover .category-play-btn {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
-            border-color: rgba(255, 255, 255, 0.4);
+        .dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
         }
 
-        .category-play-btn svg {
-            width: 1.25rem;
-            height: 1.25rem;
-            fill: white;
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.7; }
         }
 
-        /* Animación */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-            }
-
-            .logo {
-                font-size: 2.5rem;
-            }
-
-            .featured-text h2 {
-                font-size: 2rem;
-            }
-
-            .featured-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .featured-number {
-                display: none;
-            }
-
-            .categories-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
+        footer {
+            margin-top: auto;
+            padding: 30px;
+            font-size: 0.8rem;
+            color: #444;
         }
     </style>
 </head>
 <body>
-    <!-- Fondos dinámicos -->
-    <div class="background-dynamic" id="backgroundDynamic"></div>
-    <div class="background-overlay"></div>
-    <div class="gradient-overlay"></div>
 
-    <!-- Contenedor principal -->
+    <header>
+        <div class="logo"><span style="color:var(--mega-red)">MEGA</span> CHILE</div>
+    </header>
+
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo" onclick="location.reload()">TV<span>Studio</span></div>
-
-            <!-- Buscador -->
-            <div class="search-container">
-                <div class="search-wrapper">
-                    <div class="search-glow"></div>
-                    <div class="search-box">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                        <input type="text" class="search-input" id="searchInput" placeholder="Busca categorías...">
-                    </div>
-                </div>
-            </div>
+        <div class="video-wrapper">
+            <video id="video" controls autoplay playsinline></video>
         </div>
 
-        <!-- Canal destacado -->
-        <div class="featured-section">
-            <div class="featured-group" id="featuredGroup">
-                <div class="featured-glow"></div>
-                <div class="featured-card">
-                    <div class="featured-content">
-                        <div class="featured-text">
-                            <p id="featuredCategory">Categoría</p>
-                            <h2 id="featuredTitle">Selecciona una categoría</h2>
-                            <button class="btn-play" id="btnPlayFeatured">
-                                <svg style="width: 1.25rem; height: 1.25rem; fill: white;" viewBox="0 0 24 24">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                                Ver Ahora
-                            </button>
-                        </div>
-                        <div class="featured-number" id="featuredNumber">1</div>
-                    </div>
-                </div>
+        <div class="info">
+            <div class="status">
+                <span class="dot"></span> Transmisión HLS Activa
             </div>
-        </div>
-
-        <!-- Contenido principal -->
-        <div class="content-sections">
-            <!-- Categorías -->
-            <div class="section">
-                <h3 class="section-title" id="sectionTitle">Todas las categorías</h3>
-                <div class="categories-grid" id="categoriesGrid"></div>
-            </div>
-
-            <!-- TV Chilena -->
-            <div class="section">
-                <h3 class="section-title">TV Chilena</h3>
-                <div class="categories-grid" id="chileanGrid"></div>
-            </div>
+            <h2 style="margin: 0 0 10px 0;">Señal Online Directa</h2>
+            <p style="color: #999; margin: 0;">Disfrutando de la señal digital m3u8 con baja latencia y calidad adaptativa.</p>
         </div>
     </div>
 
+    <footer>Reproductor v2.0 - Basado en Hls.js</footer>
+
     <script>
-        // Variables globales
-        let allCategories = [];
-        let allChannels = {};
-        let chileanChannels = [];
-        let filteredCategories = [];
-        let selectedCategoryIndex = 0;
+        const video = document.getElementById('video');
+        // Reemplaza esta URL con la dirección m3u8 real de Mega
+        const videoSrc = 'https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8'; 
 
-        // Cargar datos desde JSON
-        async function loadData() {
-            try {
-                const response = await fetch('data.json');
-                const data = await response.json();
-                
-                allCategories = data.categories;
-                allChannels = data.channels;
-                chileanChannels = data.chileanChannels;
-                
-                filteredCategories = [...allCategories];
-                
-                // Inicializar la página
-                renderCategories();
-                renderChileanChannels();
-                updateFeatured(0);
-                
-                console.log('✅ Datos cargados correctamente');
-            } catch (error) {
-                console.error('❌ Error al cargar data.json:', error);
-                alert('Error: No se pudo cargar data.json. Verifica que el archivo existe.');
-            }
-        }
-
-        // Función para actualizar el canal destacado
-        function updateFeatured(index, isChinese = false) {
-            const items = isChinese ? chileanChannels : filteredCategories;
-            const item = items[index];
-            document.getElementById('featuredTitle').textContent = item.name;
-            document.getElementById('featuredCategory').textContent = item.type;
-            document.getElementById('featuredNumber').textContent = item.id;
-            document.getElementById('backgroundDynamic').style.backgroundImage = `url('${item.image}')`;
-            
-            // Si es un canal chileno, mostrar botón para ir a canales
-            const btnPlayFeatured = document.getElementById('btnPlayFeatured');
-            if (isChinese) {
-                btnPlayFeatured.textContent = '';
-                btnPlayFeatured.innerHTML = '<svg style="width: 1.25rem; height: 1.25rem; fill: white;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ver Canales';
-                btnPlayFeatured.onclick = () => goToChannels(item.category);
-            } else {
-                btnPlayFeatured.textContent = '';
-                btnPlayFeatured.innerHTML = '<svg style="width: 1.25rem; height: 1.25rem; fill: white;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Ver Ahora';
-                btnPlayFeatured.onclick = () => goToChannels(item.id);
-            }
-        }
-
-        // Función para ir a la página de canales
-        function goToChannels(categoryId) {
-            window.location.href = `channels.html?category=${categoryId}`;
-        }
-
-        // Función para ir al reproductor
-        function goToPlayer(channelName, channelType, channelId) {
-            const params = new URLSearchParams({
-                name: channelName,
-                type: channelType,
-                id: channelId,
-                url: ''
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
             });
-            window.location.href = `player.html?${params.toString()}`;
-        }
-
-        // Función para renderizar categorías
-        function renderCategories() {
-            const grid = document.getElementById('categoriesGrid');
-            grid.innerHTML = '';
-
-            filteredCategories.forEach((category, index) => {
-                const card = document.createElement('div');
-                card.className = 'category-card';
-                card.innerHTML = `
-                    <div class="category-glow" style="background: ${category.accent};"></div>
-                    <div class="category-card-inner">
-                        <div class="category-bg" style="background-image: url('${category.image}');"></div>
-                        <div class="category-content">
-                            <div>
-                                <div class="category-label">${category.type}</div>
-                                <div class="category-name">${category.name}</div>
-                            </div>
-                            <div class="category-play-btn">
-                                <svg viewBox="0 0 24 24">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                card.addEventListener('click', () => {
-                    selectedCategoryIndex = index;
-                    updateFeatured(index);
-                    goToChannels(category.id);
-                });
-
-                grid.appendChild(card);
+        } 
+        // Para Safari (que soporta HLS nativamente)
+        else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
             });
         }
-
-        // Función para renderizar canales chilenos
-        function renderChileanChannels() {
-            const grid = document.getElementById('chileanGrid');
-            grid.innerHTML = '';
-
-            chileanChannels.forEach((channel, index) => {
-                const card = document.createElement('div');
-                card.className = 'category-card';
-                card.innerHTML = `
-                    <div class="category-glow" style="background: ${channel.accent};"></div>
-                    <div class="category-card-inner">
-                        <div class="category-bg" style="background-image: url('${channel.image}');"></div>
-                        <div class="category-content">
-                            <div>
-                                <div class="category-label">${channel.type}</div>
-                                <div class="category-name">${channel.name}</div>
-                            </div>
-                            <div class="category-play-btn">
-                                <svg viewBox="0 0 24 24">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                card.addEventListener('click', () => {
-                    updateFeatured(index, true);
-                    goToPlayer(channel.name, channel.type, channel.id);
-                });
-
-                grid.appendChild(card);
-            });
-        }
-
-        // Función para buscar
-        function handleSearch(searchTerm) {
-            searchTerm = searchTerm.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                filteredCategories = [...categories];
-                document.getElementById('sectionTitle').textContent = 'Todas las categorías';
-            } else {
-                filteredCategories = categories.filter(cat => 
-                    cat.name.toLowerCase().includes(searchTerm) ||
-                    cat.type.toLowerCase().includes(searchTerm)
-                );
-                document.getElementById('sectionTitle').textContent = `Resultados de búsqueda: "${searchTerm}"`;
-            }
-
-            selectedCategoryIndex = 0;
-            renderCategories();
-            updateFeatured(0);
-        }
-
-        // Event listeners
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            handleSearch(e.target.value);
-        });
-
-        // Inicializar
-        loadData();
     </script>
 </body>
 </html>
