@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "TVN",
+    "emoji": "🔵",
+    "url": "https://d1gb9psy75ky90.cloudfront.net/national/live/576p30/index.m3u8",
+    "cat": "Nacional"
+  },
+  {
+    "id": 2,
+    "name": "Canal 13",
+    "emoji": "🟡",
+    "url": "https://live.canal13.cl/live.m3u8",
+    "cat": "Nacional"
+  },
+  {
+    "id": 3,
+    "name": "Mega",
+    "emoji": "🟠",
+    "url": "https://d1x0mwiac2rqwt.cloudfront.net/5e5vl4nq4oughe4s/index.m3u8",
+    "cat": "Nacional"
+  },
+  {
+    "id": 4,
+    "name": "CHV",
+    "emoji": "🔴",
+    "url": "https://d2gg3tblxgbsh1.cloudfront.net/out/v1/5f4fe434b5454db58d2b5f31ca1c30ea/index.m3u8",
+    "cat": "Nacional"
+  },
+  {
+    "id": 5,
+    "name": "La Red",
+    "emoji": "🟣",
+    "url": "https://la-red-live.amagi.tv/playlist.m3u8",
+    "cat": "Nacional"
+  },
+  {
+    "id": 6,
+    "name": "CNN Chile",
+    "emoji": "🗞️",
+    "url": "https://cnnchilelive.amagi.tv/playlist.m3u8",
+    "cat": "Noticias"
+  },
+  {
+    "id": 7,
+    "name": "24 Horas",
+    "emoji": "⌚",
+    "url": "https://d1gb9psy75ky90.cloudfront.net/24horas/live/576p30/index.m3u8",
+    "cat": "Noticias"
+  },
+  {
+    "id": 8,
+    "name": "Tele 5",
+    "emoji": "⚪",
+    "url": "https://cdn3.wowza.com/1/RTZHRFZhTFkxZU5V/bXJiST13/hls/live/playlist.m3u8",
+    "cat": "Regional"
+  },
+  {
+    "id": 9,
+    "name": "T13 Radio",
+    "emoji": "📻",
+    "url": "https://playerservices.streamtheworld.com/api/livestream-redirect/T13RADIO_SC",
+    "cat": "Radio"
+  },
+  {
+    "id": 10,
+    "name": "TV5Monde",
+    "emoji": "🇫🇷",
+    "url": "https://tv5monde-hls-live.akamaized.net/hls/live/657179/fip/index.m3u8",
+    "cat": "Internacional"
+  }
+]
